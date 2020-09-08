@@ -1,6 +1,9 @@
 <script>
 	import TagManager from './TagManager.svelte'
 	import Settings from './Settings.svelte'
+	import { createEventDispatcher } from 'svelte'
+
+	const dispatch = createEventDispatcher()
 
 	let isTagManager = false, 
 	isSettings = false
@@ -9,6 +12,7 @@
 <header class="shadow">
 	<li>hello board</li>
 	<ul>
+		<li on:click={()=>dispatch("newColumn")}>add a column</li>
 		<li on:click={()=>{isTagManager = !isTagManager; isSettings = false}}>manage tags</li>
 		<li on:click={()=>{isSettings = !isSettings; isTagManager = false}}>settings</li>
 	</ul>

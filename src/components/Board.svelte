@@ -3,7 +3,7 @@
     import { dndzone } from 'svelte-dnd-action';
     import { createEventDispatcher } from 'svelte';
 
-    export let columnItems;
+    let columnItems = []
 
     const dispatch = createEventDispatcher();
     const flipDurationMs = 300;
@@ -24,16 +24,30 @@
         columnItems = [...columnItems];
     }
     function handleClick(e) {
-        alert('dragabble elements are still clickable :)');
+        // alert('dragabble elements are still clickable :)');
+    }
+    
+    let columnId = 0
+    let cardId = 0
+
+    function newColumn(){
+        columnItems = [...columnItems, {id: columnId++, name:"No name", items: []}]
+        console.log(columnId);
+    }
+    function addNewCard(id){
+         // find specific id in array
+         let idInArray = columnItems.findIndex(x => x.id === id)
+         let ref = columnItems[idInArray].items
+         columnItems[idInArray].items = [...ref, {id: cardId++, name: "Rohan"}]
     }
 </script>
-
+<div on:click={newColumn}>add new column</div>
 <section class="board" use:dndzone={{items:columnItems, flipDurationMs, type:'columns'}} on:consider={handleDndConsiderColumns} on:finalize={handleDndFinalizeColumns}>
     {#each columnItems as column (column.id)}
         <div class="column"
              animate:flip="{{duration: flipDurationMs}}">
             <div class="column-title">
-                <div class="column-name">{column.name}</div>
+                <input class="column-name" bind:value={column.name} on:keyup={()=>dispatch("updatecolumnName",{colId: column.id, newColName: column.name})}/>
                 <div class="column-actions">
                     <li on:click={()=>{dispatch("makeNewCard", {id: column.id, pos: "top"})}}></li>
                     <li></li>
@@ -47,10 +61,13 @@
                             <li>Design</li>
                         </div>
                         <div class="card-content">{item.name}</div>
+                        <div class="card-content">
+                        </div>
                     </div>
                 {/each}
             </div>
-            <div class="new-task" on:click={()=>{dispatch("makeNewCard", {id: column.id, pos: "bot"})}}>Add new card</div>
+            <!-- <div class="new-task" on:click={()=>{dispatch("makeNewCard", {id: column.id, pos: "bot"})}}>Add new card</div> -->
+            <div class="new-task" on:click={()=>addNewCard(column.id)}>Add new card</div>
         </div>
     {/each}
 </section>
@@ -74,6 +91,10 @@
     .tags{
         display: flex;
         list-style: none;
+    }
+    .column-name{
+        width: 11rem;
+        font-weight: 500;
     }
     .tags li{
         list-style: none;
