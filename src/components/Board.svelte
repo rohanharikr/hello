@@ -34,11 +34,16 @@
         columnItems = [...columnItems, {id: columnId++, name:"No name", items: []}]
         console.log(columnId);
     }
-    function addNewCard(id){
+    function addNewCard(id, pos){
          // find specific id in array
          let idInArray = columnItems.findIndex(x => x.id === id)
          let ref = columnItems[idInArray].items
-         columnItems[idInArray].items = [...ref, {id: cardId++, name: "Rohan"}]
+         if (pos === 'top'){
+            columnItems[idInArray].items = [{id: cardId++, name: "Rohan"}, ...ref]
+         } else {
+            columnItems[idInArray].items = [...ref, {id: cardId++, name: "Rohan"}]
+         }
+
     }
 </script>
 <div on:click={newColumn}>add new column</div>
@@ -49,7 +54,9 @@
             <div class="column-title">
                 <input class="column-name" bind:value={column.name} on:keyup={()=>dispatch("updatecolumnName",{colId: column.id, newColName: column.name})}/>
                 <div class="column-actions">
-                    <li on:click={()=>{dispatch("makeNewCard", {id: column.id, pos: "top"})}}></li>
+                    <li on:click={()=>addNewCard(column.id, 'top')} class="addNewCardIcon">
+                        <img src="add.png">
+                    </li>
                     <li></li>
                 </div>
             </div>
@@ -96,6 +103,16 @@
         width: 11rem;
         font-weight: 500;
     }
+    .addNewCardIcon{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+    .addNewCardIcon img{
+        height: 1rem;
+        opacity: 0.6;
+    }
     .tags li{
         list-style: none;
         background: var(--blue-bg);
@@ -133,13 +150,15 @@
         font-weight: 500;
         justify-content: space-between;
     }
+    .column-actions{
+        display: flex;
+    }
     .column-actions li{
         list-style: none;
         background: var(--new-card);
         height: 2rem;
         width: 2rem;
         border-radius: 50%;
-        display: inline-block;
         margin-left: 0.2rem;
     }
     .card {
