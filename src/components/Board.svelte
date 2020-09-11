@@ -2,6 +2,8 @@
     import { flip } from 'svelte/animate';
     import { dndzone } from 'svelte-dnd-action';
     import { createEventDispatcher } from 'svelte';
+    import { tags } from '../stores.js';
+    import AutoComplete from "simple-svelte-autocomplete";
 
     let columnItems = []
 
@@ -29,6 +31,7 @@
     
     let columnId = 0
     let cardId = 0
+    let tagVisible = false
 
     function newColumn(){
         columnItems = [...columnItems, {id: columnId++, name:"No name", items: []}]
@@ -45,6 +48,11 @@
          }
 
     }
+    function addTag(){
+        tagVisible = true
+    }
+
+    let selectedTag;
 </script>
 <div on:click={newColumn}>add new column</div>
 <section class="board" use:dndzone={{items:columnItems, flipDurationMs, type:'columns'}} on:consider={handleDndConsiderColumns} on:finalize={handleDndFinalizeColumns}>
@@ -65,7 +73,15 @@
                 {#each column.items as item (item.id)}
                     <div class="card shadow" animate:flip="{{duration: flipDurationMs}}" on:click={handleClick}>
                         <div class="tags">
-                            <li>Design</li>
+                            {#if tagVisible}
+                                <li style="min-width: 1rem;">
+                                   <AutoComplete items={$tags} bind:selectedItem={selectedTag} labelFieldName="name" />
+                                </li>
+                                <!-- {#each $tags as {id, name}}
+                                    <li>{name}</li>
+                                {/each} -->
+                            {/if}
+                            <li on:click={addTag}>add</li> 
                         </div>
                         <div class="card-content">{item.name}</div>
                         <div class="card-content">
@@ -73,7 +89,6 @@
                     </div>
                 {/each}
             </div>
-            <!-- <div class="new-task" on:click={()=>{dispatch("makeNewCard", {id: column.id, pos: "bot"})}}>Add new card</div> -->
             <div class="new-task" on:click={()=>addNewCard(column.id)}>Add new card</div>
         </div>
     {/each}
