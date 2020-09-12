@@ -4,8 +4,10 @@
     import { createEventDispatcher } from 'svelte';
     import { tags } from '../stores.js';
     import AutoComplete from "simple-svelte-autocomplete";
+    import ColumnActions from "./ColumnActions.svelte";
 
     let columnItems = []
+    let isColumnActionsVisible = false
 
     const dispatch = createEventDispatcher();
     const flipDurationMs = 300;
@@ -28,7 +30,7 @@
     function handleClick(e) {
         // alert('dragabble elements are still clickable :)');
     }
-    
+
     let columnId = 0
     let cardId = 0
     let tagVisible = false
@@ -53,6 +55,25 @@
     }
 
     let selectedTag;
+
+    function deleteColumn(index){
+        columnItems = columnItems.filter(item => item.id !== index)
+    }
+
+    function duplicateColumn(index){
+        let idInArray = columnItems.findIndex(x => x.id === index)
+        
+        let duplicateColumn = {
+            id: columnId++,
+            name: columnItems[idInArray].name,
+            items: columnItems[idInArray].items
+        }
+
+        console.log(index, columnItems)
+
+        columnItems.splice(index+1, 0, duplicateColumn)
+        columnItems = columnItems
+    }
 </script>
 <div on:click={newColumn}>add new column</div>
 <section class="board" use:dndzone={{items:columnItems, flipDurationMs, type:'columns'}} on:consider={handleDndConsiderColumns} on:finalize={handleDndFinalizeColumns}>
@@ -65,7 +86,11 @@
                     <li on:click={()=>addNewCard(column.id, 'top')} class="addNewCardIcon">
                         <img src="add.png">
                     </li>
-                    <li></li>
+                    <li on:click={() => isColumnActionsVisible = !isColumnActionsVisible} style="position: relative;">
+                        {#if isColumnActionsVisible}
+                            <ColumnActions on:duplicate={()=> duplicateColumn(column.id)} on:delete={()=>deleteColumn(column.id)}/>
+                        {/if}
+                    </li>
                 </div>
             </div>
             <div class="column-content" use:dndzone={{items:column.items, flipDurationMs}}
@@ -75,11 +100,8 @@
                         <div class="tags">
                             {#if tagVisible}
                                 <li style="min-width: 1rem;">
-                                   <AutoComplete items={$tags} bind:selectedItem={selectedTag} labelFieldName="name" />
+                                   <AutoComplete items={$tags} bind:selectedItem={selectedTag} labelFieldName="name" on:click={()=>alert(selectedTag)} />
                                 </li>
-                                <!-- {#each $tags as {id, name}}
-                                    <li>{name}</li>
-                                {/each} -->
                             {/if}
                             <li on:click={addTag}>add</li> 
                         </div>
@@ -175,6 +197,7 @@
         width: 2rem;
         border-radius: 50%;
         margin-left: 0.2rem;
+        cursor: pointer;
     }
     .card {
         min-height: 6rem;
